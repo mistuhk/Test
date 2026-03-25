@@ -1,0 +1,20 @@
+export default {
+  _widgetLabel: 'ETS Review Form',
+  formTitle: 'ETS Review Form',
+  etsAutoStatus: 'ETS Automation Status',
+  etsAutoComment: 'ETS Automation Comment',
+  etsReviewComment: 'ETS Review Comment',
+  etsSiteVisit: 'ETS Site Visit',
+  etsReviewStatus: 'ETS Review Status',
+  reviewStatus: 'Review Status',
+  updateButton: 'Update',
+  accepted: 'ACCEPTED',
+  rejected: 'REJECTED',
+  partAccepted: 'PART ACCEPTED',
+  referToRiw: 'REFER TO RIW',
+  successMessage: 'Review updated successfully.',
+  errorMessage: 'Failed to update review. Please try again.',
+  noFeatureMessage: 'Waiting for ETSFeatureSelected notification from Review Features.',
+  updatingMessage: 'Updating ETS Review Feature...',
+  noStatusMessage: 'Please select a review status before updating.'
+}
