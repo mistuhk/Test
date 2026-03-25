@@ -1,0 +1,22 @@
+export default {
+  _widgetLabel: 'Review Features Grid List Settings',
+  selectDataSource: 'Select Feature Layer Data Source',
+  mapSelector: 'Select Map Widget',
+  webApiUrl: 'Web API URL for data',
+  urlParameterExpression: 'URL parameter expression (e.g. crn={crn})',
+  columnHeaders: 'Column headers (fieldName:Label pairs, comma-separated e.g. FeatureCode:Feature Code,ETSAutoStatus:ETS AutoStatus)',
+  objectIdField: 'ObjectId field name in API response (e.g. objectId or OBJECTID) — never shown in table but sent in ETSFeatureSelected payload',
+  zoomToFeature: 'Zoom to feature on row click',
+  zoomExpression: 'Zoom SQL expression (e.g. OBJECTID = {objectId})',
+  highlightFeature: 'Highlight feature on map',
+  flashFeature: 'Flash feature on map',
+  filterLayer: 'Filter layer',
+  addTitle: 'Show widget title',
+  list_title: 'Widget title',
+  itemsPerPage: 'Items per page',
+  useUsernameDataFilter: 'Append username to data filter URL',
+  useNavigation: 'Navigate to a different view on row click',
+  viewName: 'View name',
+  targetWidgetIds: 'Notification target widget IDs (ETSFeatureSelected dispatched here on row click)',
+  enterWidgetId: 'Enter widget ID'
+}
