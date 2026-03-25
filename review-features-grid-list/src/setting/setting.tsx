@@ -159,24 +159,36 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<I
         </SettingSection>
 
         {/* Column configuration */}
-        <SettingSection title='Columns'>
-          <SettingRow label={fmt('columnHeaders', defaultI18nMessages.columnHeaders)} />
-          <SettingRow>
-            <TextInput size='sm' value={c.columnHeaders || ''}
-              onChange={this.onTextChange('columnHeaders')}
-              onBlur={this.onTextChange('columnHeaders')}
-              onKeyUp={this.onTextChange('columnHeaders')}
-            />
-          </SettingRow>
-          <SettingRow label={fmt('objectIdField', defaultI18nMessages.objectIdField)} />
-          <SettingRow>
-            <TextInput size='sm' value={c.objectIdField || 'objectId'}
-              onChange={this.onTextChange('objectIdField')}
-              onBlur={this.onTextChange('objectIdField')}
-              onKeyUp={this.onTextChange('objectIdField')}
-            />
-          </SettingRow>
-        </SettingSection>
+        {/* Column configuration */}
+<SettingSection title='Columns'>
+
+  <SettingRow label='Column headers:' />
+  <SettingRow>
+    <div style={{ fontSize: '11px', color: '#888', marginBottom: '4px', lineHeight: '1.4' }}>
+      Format: <strong>fieldName:Label</strong> pairs, comma-separated.<br/>
+      e.g. <em>FeatureCode:Feature Code,ETSAutoStatus:ETS AutoStatus</em>
+    </div>
+    <TextInput size='sm' value={c.columnHeaders || ''}
+      onChange={this.onTextChange('columnHeaders')}
+      onBlur={this.onTextChange('columnHeaders')}
+      onKeyUp={this.onTextChange('columnHeaders')}
+    />
+  </SettingRow>
+
+  <SettingRow label='ObjectId field name:' />
+  <SettingRow>
+    <div style={{ fontSize: '11px', color: '#888', marginBottom: '4px', lineHeight: '1.4' }}>
+      The field in the API response holding the objectId (e.g. <em>objectId</em> or <em>OBJECTID</em>).
+      Never shown in the table — sent in the ETSFeatureSelected payload on row click.
+    </div>
+    <TextInput size='sm' value={c.objectIdField || 'objectId'}
+      onChange={this.onTextChange('objectIdField')}
+      onBlur={this.onTextChange('objectIdField')}
+      onKeyUp={this.onTextChange('objectIdField')}
+    />
+  </SettingRow>
+
+</SettingSection>
 
         {/* Title */}
         <SettingSection title='Title'>
