@@ -1,0 +1,17 @@
+{
+  "name": "available-cases-grid-list",
+  "label": "Available Cases Grid List",
+  "type": "widget",
+  "version": "1.12.0",
+  "exbVersion": "1.12.0",
+  "author": "Welsh Government",
+  "description": "Displays available QA cases in a tabular grid. Supports per-row and bulk QA Complete actions with configurable confirmation popups, dynamic columns, sticky layout, and clean service-layer architecture.",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {},
+  "translatedLocales": ["en"],
+  "defaultSize": {
+    "width": 500,
+    "height": 400
+  }
+}
