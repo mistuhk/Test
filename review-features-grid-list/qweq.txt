@@ -1,0 +1,86 @@
+zoomToCrnParcels = async (jmv: JimuMapView, crn: string) => {
+  if (!this.props.useDataSources || this.props.useDataSources.length < 2) {
+    console.error('Custom Search - two data sources required: CRN table and LPIS layer')
+    return
+  }
+
+  const dsManager = DataSourceManager.getInstance()
+
+  // Step 1 — get CRN table (useDataSources[0]) and query for polygonIds
+  const crnTableDs = dsManager.getDataSource(
+    this.props.useDataSources[0].dataSourceId
+  ) as FeatureLayerDataSource
+
+  if (!crnTableDs || !crnTableDs.layer) {
+    console.error('Custom Search - CRN table data source not available')
+    return
+  }
+
+  const crnField = this.props.config.crnField || 'CRN'
+  const polygonIdFieldCrnTable = this.props.config.polygonIdFieldCrnTable || 'polygonId'
+  const polygonIdFieldLpisLayer = this.props.config.polygonIdFieldLpisLayer || 'polygonId'
+
+  const crnQuery = crnTableDs.layer.createQuery()
+  crnQuery.where = `${crnField} = '${crn}'`
+  crnQuery.outFields = [polygonIdFieldCrnTable]
+  crnQuery.returnGeometry = false
+
+  let polygonIds: string[] = []
+
+  try {
+    const crnResult = await crnTableDs.layer.queryFeatures(crnQuery)
+    polygonIds = crnResult.features.map(f => f.attributes[polygonIdFieldCrnTable])
+    console.log(`Custom Search - found ${polygonIds.length} polygonId(s) for CRN ${crn}:`, polygonIds)
+  } catch (error) {
+    console.error('Custom Search - error querying CRN table:', error)
+    return
+  }
+
+  if (polygonIds.length === 0) {
+    console.warn(`Custom Search - no polygonIds found for CRN: ${crn}`)
+    return
+  }
+
+  // Step 2 — get LPIS layer (useDataSources[1]) and query parcels by polygonIds
+  const lpisDs = dsManager.getDataSource(
+    this.props.useDataSources[1].dataSourceId
+  ) as FeatureLayerDataSource
+
+  if (!lpisDs || !lpisDs.layer) {
+    console.error('Custom Search - LPIS layer data source not available')
+    return
+  }
+
+  // Build IN clause — wrap each polygonId in single quotes
+  const inClause = polygonIds.map(id => `'${id}'`).join(',')
+  const whereClause = `${polygonIdFieldLpisLayer} IN (${inClause})`
+
+  const lpisQuery = lpisDs.layer.createQuery()
+  lpisQuery.where = whereClause
+  lpisQuery.outFields = ['*']
+  lpisQuery.returnGeometry = true
+
+  try {
+    // Clear existing graphics
+    this.removeGraphics(jmv, this.graphicName)
+
+    // Zoom to collective extent of all matching parcels
+    const extentResult = await lpisDs.layer.queryExtent(lpisQuery)
+    if (extentResult.count > 0) {
+      console.log(`Custom Search - zooming to collective extent of ${extentResult.count} parcel(s)`)
+      jmv.view.goTo(extentResult.extent)
+    }
+
+    // Highlight each parcel individually
+    if (this.props.config.highlightFeature) {
+      const featureResult = await lpisDs.layer.queryFeatures(lpisQuery)
+      console.log(`Custom Search - highlighting ${featureResult.features.length} parcel(s)`)
+      featureResult.features.forEach(feature => {
+        this.addFeatureGraphic(feature.geometry)
+      })
+    }
+
+  } catch (error) {
+    console.error('Custom Search - error querying LPIS layer:', error)
+  }
+}
