@@ -557,82 +557,72 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
         <button style={clearBtnStyle} onClick={clearSearch}>{defaultMessages.clearButton}</button>
       </div>
 
-      {/* Table header — sticky, separate from tbody so only rows scroll */}
-      <div ref={theadRef} style={theadWrapStyle}>
-        <table style={tableStyle}>
-          {renderColGroup()}
-          <thead>
-            <tr>
-              {showButtons && (
-                <th style={{ ...thStyle, width: '30px' }}></th>
-              )}
-              {columns.map((col, i) => (
-                <th key={i} style={thStyle}>{col.label}</th>
-              ))}
-              {showButtons && (
-                <th style={{ ...thStyle, width: '90px' }}>Action</th>
-              )}
-            </tr>
-          </thead>
-        </table>
-      </div>
-
-      {/* Table body — scrollable */}
-      <div ref={tbodyRef} style={tbodyWrapStyle}>
-        <table style={tableStyle}>
-          {renderColGroup()}
-          <tbody>
-            {currentItems.length === 0 && !isLoading && (
-              <tr>
-                <td
-                  colSpan={columns.length + (showButtons ? 2 : 0)}
-                  style={noDataStyle}
-                >
-                  {defaultMessages.noData}
-                </td>
-              </tr>
+      {/* Single scrollable container — thead sticks naturally via CSS */}
+<div ref={tbodyRef} style={tbodyWrapStyle}>
+  <table style={tableStyle}>
+    {renderColGroup()}
+    <thead>
+      <tr>
+        {showButtons && (
+          <th style={{ ...thStyle, width: '30px' }}></th>
+        )}
+        {columns.map((col, i) => (
+          <th key={i} style={thStyle}>{col.label}</th>
+        ))}
+        {showButtons && (
+          <th style={{ ...thStyle, width: '90px' }}>Action</th>
+        )}
+      </tr>
+    </thead>
+    <tbody>
+      {currentItems.length === 0 && !isLoading && (
+        <tr>
+          <td
+            colSpan={columns.length + (showButtons ? 2 : 0)}
+            style={noDataStyle}
+          >
+            {defaultMessages.noData}
+          </td>
+        </tr>
+      )}
+      {currentItems.map((item, rowIndex) => {
+        const isEven = rowIndex % 2 === 1
+        return (
+          <tr key={rowIndex}>
+            {showButtons && originalData.length > 1 && (
+              <td style={cbStyle}>
+                <input
+                  type='checkbox'
+                  data-rowindex={String(rowIndex)}
+                  onChange={onCheckboxChange}
+                  style={{ cursor: 'pointer', accentColor: '#076FE5' }}
+                />
+              </td>
             )}
-            {currentItems.map((item, rowIndex) => {
-              const isEven = rowIndex % 2 === 1
-              return (
-                <tr key={rowIndex}>
-                  {/* Checkbox — only when showButtons and more than 1 row */}
-                  {showButtons && originalData.length > 1 && (
-                    <td style={cbStyle}>
-                      <input
-                        type='checkbox'
-                        data-rowindex={String(rowIndex)}
-                        onChange={onCheckboxChange}
-                        style={{ cursor: 'pointer', accentColor: '#076FE5' }}
-                      />
-                    </td>
-                  )}
-                  {showButtons && originalData.length <= 1 && (
-                    <td style={cbStyle}></td>
-                  )}
-                  {/* Data cells */}
-                  {columns.map((col, colIndex) => (
-                    <td key={colIndex} style={tdStyle(false, isEven)}>
-                      {item[col.field] !== undefined ? String(item[col.field]) : ''}
-                    </td>
-                  ))}
-                  {/* Per-row action button */}
-                  {showButtons && (
-                    <td style={{ ...tdStyle(false, isEven), textAlign: 'center' }}>
-                      <button
-                        style={rowActionBtnStyle}
-                        onClick={() => onRowActionClick(item)}
-                      >
-                        {props.config.buttonCaption || 'QA Complete'}
-                      </button>
-                    </td>
-                  )}
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+            {showButtons && originalData.length <= 1 && (
+              <td style={cbStyle}></td>
+            )}
+            {columns.map((col, colIndex) => (
+              <td key={colIndex} style={tdStyle(false, isEven)}>
+                {item[col.field] !== undefined ? String(item[col.field]) : ''}
+              </td>
+            ))}
+            {showButtons && (
+              <td style={{ ...tdStyle(false, isEven), textAlign: 'center' }}>
+                <button
+                  style={rowActionBtnStyle}
+                  onClick={() => onRowActionClick(item)}
+                >
+                  {props.config.buttonCaption || 'QA Complete'}
+                </button>
+              </td>
+            )}
+          </tr>
+        )
+      })}
+    </tbody>
+  </table>
+</div>
 
       {/* Pagination row — sticky bottom: pagination left, global button right */}
       <div style={pgRowStyle}>
