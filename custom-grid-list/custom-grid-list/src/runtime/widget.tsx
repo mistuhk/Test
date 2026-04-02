@@ -1,4 +1,5 @@
-import { React, AllWidgetProps, appActions, DataSourceComponent, FeatureLayerDataSource, DataSourceManager } from 'jimu-core'
+/** @jsx jsx */
+import { React, AllWidgetProps, appActions, DataSourceComponent, FeatureLayerDataSource, DataSourceManager, jsx } from 'jimu-core'
 import { JimuMapViewComponent, JimuMapView } from 'jimu-arcgis'
 import { Pagination } from 'jimu-ui'
 import Graphic from 'esri/Graphic'
@@ -7,6 +8,27 @@ import { fetchData, callRowAction, callGlobalAction } from 'widgets/shared-code/
 import { getAllUrlParams } from 'widgets/shared-code/urlParamService'
 import { ConfirmationPopup } from 'widgets/shared-code/ConfirmationPopup'
 import { NotificationBanner } from 'widgets/shared-code/NotificationBanner'
+import {
+  containerStyle,
+  titleStyle,
+  messageLabelStyle,
+  searchRowStyle,
+  searchInputStyle,
+  searchBtnStyle,
+  clearBtnStyle,
+  tbodyWrapStyle,
+  tableStyle,
+  thStyle,
+  tdStyle,
+  cbCellStyle,
+  rowActionBtnStyle,
+  pgRowStyle,
+  pgLeftStyle,
+  pgRightStyle,
+  countLabelStyle,
+  globalBtnStyle,
+  noDataStyle
+} from './style'
 import defaultMessages from './translations/default'
 
 const { useState, useEffect, useRef, useCallback } = React
@@ -19,192 +41,6 @@ interface Column {
 }
 
 type PopupContext = 'row' | 'global' | null
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
-const containerStyle: React.CSSProperties = {
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  overflow: 'hidden',
-  position: 'relative',
-  fontFamily: 'Arial',
-  fontSize: '13px'
-}
-
-const titleStyle: React.CSSProperties = {
-  flexShrink: 0,
-  backgroundColor: '#076FE5',
-  color: 'white',
-  textAlign: 'center',
-  fontWeight: 'bold',
-  fontSize: '13px',
-  padding: '8px',
-  letterSpacing: '0.8px'
-}
-
-const messageLabelStyle = (type: 'success' | 'error' | 'info'): React.CSSProperties => ({
-  flexShrink: 0,
-  fontSize: '12px',
-  padding: '7px 10px',
-  fontWeight: 'bold',
-  fontStyle: 'italic',
-  fontFamily: 'Arial',
-  borderLeft: '4px solid',
-  ...(type === 'success' && { background: '#e8f8f0', color: '#03b161', borderColor: '#03b161' }),
-  ...(type === 'error' && { background: '#fde8e8', color: '#cc0000', borderColor: '#cc0000' }),
-  ...(type === 'info' && { background: '#e6f1fb', color: '#076FE5', borderColor: '#076FE5' })
-})
-
-const searchRowStyle: React.CSSProperties = {
-  flexShrink: 0,
-  display: 'flex',
-  gap: '4px',
-  padding: '5px',
-  backgroundColor: '#fff',
-  borderBottom: '1px solid #D3D3D3',
-  alignItems: 'center'
-}
-
-const searchInputStyle: React.CSSProperties = {
-  flex: 1,
-  padding: '4px 6px',
-  border: '1px solid #ccc',
-  fontSize: '12px',
-  borderRadius: 0,
-  fontFamily: 'Arial'
-}
-
-const searchBtnStyle: React.CSSProperties = {
-  padding: '4px 8px',
-  backgroundColor: '#555',
-  color: 'white',
-  border: 'none',
-  cursor: 'pointer',
-  fontSize: '13px',
-  borderRadius: 0
-}
-
-const clearBtnStyle: React.CSSProperties = {
-  padding: '4px 8px',
-  backgroundColor: '#076FE5',
-  color: 'white',
-  border: 'none',
-  cursor: 'pointer',
-  fontSize: '12px',
-  fontFamily: 'Arial',
-  fontWeight: 'bold',
-  borderRadius: 0
-}
-
-const tbodyWrapStyle: React.CSSProperties = {
-  flex: 1,
-  overflowY: 'auto',
-  overflowX: 'auto'
-}
-
-const tableStyle: React.CSSProperties = {
-  width: 'max-content',
-  minWidth: '100%',
-  borderCollapse: 'collapse',
-  tableLayout: 'auto'
-}
-
-const thStyle: React.CSSProperties = {
-  position: 'sticky',
-  top: 0,
-  zIndex: 1,
-  backgroundColor: '#076FE5',
-  color: 'white',
-  padding: '6px 7px',
-  textAlign: 'left',
-  fontWeight: 'bold',
-  border: '1px solid #0559be',
-  whiteSpace: 'nowrap',
-  fontSize: '12px',
-  maxWidth: '250px'
-}
-
-const tdStyle = (isSelected: boolean, isEven: boolean): React.CSSProperties => ({
-  padding: '5px 7px',
-  border: '1px solid #D3D3D3',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-  maxWidth: '250px',
-  fontSize: '12px',
-  cursor: 'pointer',
-  fontWeight: isSelected ? 'bold' : 'normal',
-  backgroundColor: isSelected ? '#9ecef5' : isEven ? '#f2f6fb' : '#fff'
-})
-
-const cbCellStyle: React.CSSProperties = {
-  textAlign: 'center',
-  padding: '4px',
-  border: '1px solid #D3D3D3',
-  width: '30px'
-}
-
-const rowActionBtnStyle: React.CSSProperties = {
-  backgroundColor: '#076FE5',
-  color: 'white',
-  border: 'none',
-  fontFamily: 'Arial',
-  fontWeight: 'bold',
-  fontSize: '10px',
-  padding: '2px 5px',
-  cursor: 'pointer',
-  borderRadius: 0
-}
-
-const pgRowStyle: React.CSSProperties = {
-  flexShrink: 0,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: '4px 6px',
-  borderTop: '1px solid #D3D3D3',
-  backgroundColor: '#fff'
-}
-
-const pgLeftStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '3px'
-}
-
-const pgRightStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '6px'
-}
-
-const countLabelStyle: React.CSSProperties = {
-  fontSize: '11px',
-  color: '#555',
-  fontStyle: 'italic'
-}
-
-const globalBtnStyle: React.CSSProperties = {
-  backgroundColor: '#076FE5',
-  color: 'white',
-  border: 'none',
-  fontFamily: 'Arial',
-  fontWeight: 'bold',
-  fontSize: '11px',
-  padding: '5px 9px',
-  cursor: 'pointer',
-  borderRadius: 0,
-  whiteSpace: 'nowrap'
-}
-
-const noDataStyle: React.CSSProperties = {
-  padding: '12px',
-  textAlign: 'center',
-  color: '#888',
-  fontStyle: 'italic',
-  fontSize: '12px'
-}
 
 // ─── Widget ───────────────────────────────────────────────────────────────────
 
@@ -330,11 +166,9 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
     props.config.itemsPerPage
   ])
 
-  useEffect(() => {
-    loadData(1)
-  }, [])
+  useEffect(() => { loadData(1) }, [])
 
-  // ─── TextContent listener (search widget) ────────────────────────────────────
+  // ─── TextContent listener (connected search widget) ───────────────────────────
 
   useEffect(() => {
     const incoming = props.stateProps?.TextContent
@@ -353,22 +187,17 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
     const payload = props.stateProps?.[channel]
     if (!payload) return
 
-    console.log(`custom-grid-list - received notification on channel '${channel}':`, JSON.stringify(payload))
+    console.log(`custom-grid-list - received on '${channel}':`, JSON.stringify(payload))
 
     if (props.config.listenAction === 'refresh') {
       loadData(1)
       setRefreshBanner(defaultMessages.refreshBanner)
     } else if (props.config.listenAction === 'populate') {
-      // Forward the received payload to all populateTargetWidgetIds
       const populateChannel = props.config.populateNotificationChannel
       const populateTargets = props.config.populateTargetWidgetIds
-
       if (populateChannel && populateTargets && populateTargets.length > 0) {
-        console.log(`custom-grid-list - forwarding payload on channel '${populateChannel}':`, JSON.stringify(payload))
         populateTargets.forEach((widgetId: string) => {
-          props.dispatch(
-            appActions.widgetStatePropChange(widgetId, populateChannel, payload)
-          )
+          props.dispatch(appActions.widgetStatePropChange(widgetId, populateChannel, payload))
         })
       }
     }
@@ -392,9 +221,7 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
     const columns = getColumns()
     const lower = searchText.toLowerCase()
     const filtered = originalData.filter(item =>
-      columns.some(col =>
-        getCellValue(item, col.field).toLowerCase().includes(lower)
-      )
+      columns.some(col => getCellValue(item, col.field).toLowerCase().includes(lower))
     )
     const itemsPerPage = parseInt(props.config.itemsPerPage) || 10
     setCurrentItems(filtered.slice(0, itemsPerPage))
@@ -417,17 +244,15 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
   // ─── Row click ────────────────────────────────────────────────────────────────
 
   const handleRowClick = (item: any) => {
-    // Highlight the clicked row
-    const keyField = props.config.dispatchPayloadField
-    const keyVal = keyField ? item[keyField] : null
+    const keyVal = props.config.dispatchPayloadField
+      ? item[props.config.dispatchPayloadField]
+      : null
     setSelectedRowKey(keyVal)
 
-    // Zoom/highlight on map if enabled
     if (props.config.enableRowDispatch && props.config.zoomToFeature && jimuMapView) {
       zoomToFeature(jimuMapView, item)
     }
 
-    // Dispatch notification if enabled
     if (
       props.config.enableRowDispatch &&
       props.config.dispatchNotificationChannel &&
@@ -452,7 +277,7 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
       }
 
       setDispatchBanner(
-        `${defaultMessages.dispatchBanner}${props.config.dispatchNotificationChannel} — ${props.config.dispatchPayloadKey}: ${item[props.config.dispatchPayloadField]}`
+        `${defaultMessages.dispatchBanner}${props.config.dispatchNotificationChannel}`
       )
     }
   }
@@ -465,16 +290,20 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
     let whereClause = props.config.zoomExpression
     const regexp = /{(.*?)}/g
     const matches = Array.from(props.config.zoomExpression.matchAll(regexp))
-
     matches.forEach((match: RegExpMatchArray) => {
-      whereClause = whereClause.replace(match[0], item[match[1]] !== undefined ? String(item[match[1]]) : '')
+      whereClause = whereClause.replace(
+        match[0],
+        item[match[1]] !== undefined ? String(item[match[1]]) : ''
+      )
     })
 
     removeGraphics(jmv)
 
     for (let i = 0; i < props.useDataSources.length; i++) {
       const dsManager = DataSourceManager.getInstance()
-      const ds = dsManager.getDataSource(props.useDataSources[i].dataSourceId) as FeatureLayerDataSource
+      const ds = dsManager.getDataSource(
+        props.useDataSources[i].dataSourceId
+      ) as FeatureLayerDataSource
       if (!ds || !ds.layer) continue
 
       const query = ds.layer.createQuery()
@@ -614,13 +443,11 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
 
   // ─── Render ───────────────────────────────────────────────────────────────────
 
-  const columns          = getColumns()
-  const showCheckboxes   = props.config.showCheckboxes || false
-  const showRowAction    = props.config.showRowActionButton || false
-  const showGlobalBtn    = props.config.showGlobalButton || false
-  // Global button only meaningful at runtime when checkboxes are also enabled
-  // (rows must be checkable before a global action can be triggered)
-  const showGlobal       = showGlobalBtn && showCheckboxes && checkedCount >= 2
+  const columns        = getColumns()
+  const showCheckboxes = props.config.showCheckboxes || false
+  const showRowAction  = props.config.showRowActionButton || false
+  const showGlobalBtn  = props.config.showGlobalButton || false
+  const showGlobal     = showGlobalBtn && showCheckboxes && checkedCount >= 2
 
   return (
     <div style={containerStyle}>
@@ -652,7 +479,7 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
         props.useDataSources.length > 0 && (
           <DataSourceComponent
             useDataSource={props.useDataSources[0]}
-            onDataSourceCreated={(ds: FeatureLayerDataSource) => {
+            onDataSourceCreated={() => {
               console.log('custom-grid-list - data source ready')
             }}
           />
@@ -673,7 +500,7 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
       <NotificationBanner message={refreshBanner} durationMs={3000} />
       <NotificationBanner message={dispatchBanner} durationMs={4000} icon='⚡' />
 
-      {/* Search bar */}
+      {/* Search bar — sticky */}
       <div style={searchRowStyle}>
         <input
           style={searchInputStyle}
@@ -687,7 +514,7 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
         <button style={clearBtnStyle} onClick={clearSearch}>{defaultMessages.clearButton}</button>
       </div>
 
-      {/* Table — single scrollable container, thead sticky via CSS */}
+      {/* Table — single scrollable container, thead sticky via position: sticky on th */}
       <div ref={tbodyRef} style={tbodyWrapStyle}>
         <table style={tableStyle}>
           <thead>
@@ -726,11 +553,9 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
               const isEven = rowIndex % 2 === 1
 
               return (
-                <tr
-                  key={rowIndex}
-                  onClick={() => handleRowClick(item)}
-                >
-                  {/* Checkbox — independent toggle, only when more than 1 row total */}
+                <tr key={rowIndex} onClick={() => handleRowClick(item)}>
+
+                  {/* Checkbox — only when showCheckboxes and more than 1 row total */}
                   {showCheckboxes && originalData.length > 1 && (
                     <td style={cbCellStyle}>
                       <input
@@ -761,6 +586,7 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
                       </button>
                     </td>
                   )}
+
                 </tr>
               )
             })}
