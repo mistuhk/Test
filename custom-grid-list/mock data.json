@@ -1,0 +1,72 @@
+[
+  {
+    "objectId": 4401,
+    "featureCode": "MG3",
+    "etsAutoStatus": "ACCEPTED",
+    "etsReviewStatus": "ACCEPTED",
+    "etsSiteVisit": false
+  },
+  {
+    "objectId": 4402,
+    "featureCode": "M20",
+    "etsAutoStatus": "ACCEPTED",
+    "etsReviewStatus": "ACCEPTED",
+    "etsSiteVisit": false
+  },
+  {
+    "objectId": 4403,
+    "featureCode": "H9",
+    "etsAutoStatus": "REJECTED",
+    "etsReviewStatus": "REJECTED",
+    "etsSiteVisit": false
+  },
+  {
+    "objectId": 4404,
+    "featureCode": "W1",
+    "etsAutoStatus": "PART_ACCEPTED",
+    "etsReviewStatus": "PART_ACCEPTED",
+    "etsSiteVisit": true
+  },
+  {
+    "objectId": 4405,
+    "featureCode": "NVC_CG10",
+    "etsAutoStatus": "REFER_TO_RIW",
+    "etsReviewStatus": "REFER_TO_RIW",
+    "etsSiteVisit": true
+  },
+  {
+    "objectId": 4406,
+    "featureCode": "M19",
+    "etsAutoStatus": "ACCEPTED",
+    "etsReviewStatus": "PART_ACCEPTED",
+    "etsSiteVisit": true
+  },
+  {
+    "objectId": 4407,
+    "featureCode": "OV1",
+    "etsAutoStatus": "REJECTED",
+    "etsReviewStatus": "REJECTED",
+    "etsSiteVisit": false
+  },
+  {
+    "objectId": 4408,
+    "featureCode": "H12",
+    "etsAutoStatus": "ACCEPTED",
+    "etsReviewStatus": "",
+    "etsSiteVisit": false
+  },
+  {
+    "objectId": 4409,
+    "featureCode": "W4",
+    "etsAutoStatus": "PART_ACCEPTED",
+    "etsReviewStatus": "",
+    "etsSiteVisit": false
+  },
+  {
+    "objectId": 4410,
+    "featureCode": "MG5",
+    "etsAutoStatus": "",
+    "etsReviewStatus": "",
+    "etsSiteVisit": false
+  }
+]
