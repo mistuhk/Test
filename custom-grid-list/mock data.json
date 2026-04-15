@@ -1,76 +1,55 @@
 [
   {
-    "objectId": 4401,
-    "featureCode": "MG3",
-    "etsAutoStatus": "ACCEPTED",
-    "etsReviewStatus": "ACCEPTED",
-    "etsSiteVisit": false
+    "caseId": 1571201,
+    "crn": "A0069412",
+    "fileRefNo": "WG/ETS/2024/00312"
   },
   {
-    "objectId": 4402,
-    "featureCode": "M20",
-    "etsAutoStatus": "ACCEPTED",
-    "etsReviewStatus": "ACCEPTED",
-    "etsSiteVisit": false
+    "caseId": 1571202,
+    "crn": "A0069415",
+    "fileRefNo": "WG/ETS/2024/00317"
   },
   {
-    "objectId": 4403,
-    "featureCode": "H9",
-    "etsAutoStatus": "REJECTED",
-    "etsReviewStatus": "REJECTED",
-    "etsSiteVisit": false
+    "caseId": 1571203,
+    "crn": "A0069421",
+    "fileRefNo": "WG/ETS/2024/00325"
   },
   {
-    "objectId": 4404,
-    "featureCode": "W1",
-    "etsAutoStatus": "PART_ACCEPTED",
-    "etsReviewStatus": "PART_ACCEPTED",
-    "etsSiteVisit": true
+    "caseId": 1571204,
+    "crn": "A0069433",
+    "fileRefNo": "WG/ETS/2024/00341"
   },
   {
-    "objectId": 4405,
-    "featureCode": "NVC_CG10",
-    "etsAutoStatus": "REFER_TO_RIW",
-    "etsReviewStatus": "REFER_TO_RIW",
-    "etsSiteVisit": true
+    "caseId": 1571205,
+    "crn": "A0069447",
+    "fileRefNo": "WG/ETS/2024/00356"
   },
   {
-    "objectId": 4406,
-    "featureCode": "M19",
-    "etsAutoStatus": "ACCEPTED",
-    "etsReviewStatus": "PART_ACCEPTED",
-    "etsSiteVisit": true
+    "caseId": 1571206,
+    "crn": "A0069452",
+    "fileRefNo": "WG/ETS/2024/00362"
   },
   {
-    "objectId": 4407,
-    "featureCode": "OV1",
-    "etsAutoStatus": "REJECTED",
-    "etsReviewStatus": "REJECTED",
-    "etsSiteVisit": false
+    "caseId": 1571207,
+    "crn": "A0069468",
+    "fileRefNo": "WG/ETS/2024/00378"
   },
   {
-    "objectId": 4408,
-    "featureCode": "H12",
-    "etsAutoStatus": "ACCEPTED",
-    "etsReviewStatus": "",
-    "etsSiteVisit": false
+    "caseId": 1571208,
+    "crn": "A0069471",
+    "fileRefNo": "WG/ETS/2024/00384"
   },
   {
-    "objectId": 4409,
-    "featureCode": "W4",
-    "etsAutoStatus": "PART_ACCEPTED",
-    "etsReviewStatus": "",
-    "etsSiteVisit": false
+    "caseId": 1571209,
+    "crn": "A0069489",
+    "fileRefNo": "WG/ETS/2024/00401"
   },
   {
-    "objectId": 4410,
-    "featureCode": "MG5",
-    "etsAutoStatus": "",
-    "etsReviewStatus": "",
-    "etsSiteVisit": false
+    "caseId": 1571210,
+    "crn": "A0069493",
+    "fileRefNo": "WG/ETS/2024/00409"
   }
 ]
-
 
 
 [
