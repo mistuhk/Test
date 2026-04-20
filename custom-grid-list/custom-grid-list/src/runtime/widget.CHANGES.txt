@@ -1,0 +1,89 @@
+// ============================================================
+// CHANGES TO: widgets/custom-grid-list/src/runtime/widget.tsx
+// Improvement #1 — Loading indicator
+// Two targeted changes. Apply both to the existing file.
+// ============================================================
+
+
+// ── CHANGE 1: import loadingCellStyle ────────────────────────────────────────
+//
+// FIND the existing import from './style' (around line 6674).
+// It will look something like:
+//
+//     import {
+//         containerStyle,
+//         ...
+//         globalBtnStyle,
+//         ...
+//     } from './style'
+//
+// ADD  loadingCellStyle  to that import list:
+//
+//     import {
+//         containerStyle,
+//         ...
+//         globalBtnStyle,
+//         loadingCellStyle,     // NEW CHANGE: import for improvement #1
+//         ...
+//     } from './style'
+
+
+// ── CHANGE 2: loading row in the tbody ───────────────────────────────────────
+//
+// FIND this block inside the <tbody> (around line 7463):
+//
+//     <tbody>
+//         {currentItems.length === 0 && !isLoading && (
+//             <tr>
+//                 <td
+//                     colSpan={
+//                         columns.length +
+//                         (showCheckboxes && originalData.length > 1 ? 1 : 0) +
+//                         (showRowAction ? 1 : 0)
+//                     }
+//                     style={noDataStyle}
+//                 >
+//                     {props.config.noDataMessage || defaultMessages.noData}
+//                 </td>
+//             </tr>
+//         )}
+//
+// REPLACE WITH the block below. The only addition is the new loading row
+// inserted immediately before the existing no-data row:
+//
+//     <tbody>
+//         {/* NEW CHANGE: loading row — improvement #1.
+//             Shown while isLoading is true. Uses a pulsing animation defined
+//             in loadingCellStyle (style.tsx). The colSpan mirrors the no-data
+//             row exactly so it always spans the full table width regardless
+//             of which optional columns (checkboxes, action button) are active.
+//             The two rows are mutually exclusive: isLoading suppresses the
+//             no-data row so only one ever renders at a time. */}
+//         {isLoading && (
+//             <tr>
+//                 <td
+//                     colSpan={
+//                         columns.length +
+//                         (showCheckboxes && originalData.length > 1 ? 1 : 0) +
+//                         (showRowAction ? 1 : 0)
+//                     }
+//                     style={loadingCellStyle}
+//                 >
+//                     Loading...
+//                 </td>
+//             </tr>
+//         )}
+//         {currentItems.length === 0 && !isLoading && (
+//             <tr>
+//                 <td
+//                     colSpan={
+//                         columns.length +
+//                         (showCheckboxes && originalData.length > 1 ? 1 : 0) +
+//                         (showRowAction ? 1 : 0)
+//                     }
+//                     style={noDataStyle}
+//                 >
+//                     {props.config.noDataMessage || defaultMessages.noData}
+//                 </td>
+//             </tr>
+//         )}
