@@ -1,0 +1,12 @@
+{
+  "buttonCaption": "",
+  "targetWidgetIds": [],
+  "icon_file": "",
+  "button_action_url": "",
+  "button_action_params": "",
+  "useNavigation": false,
+  "view_name": "",
+  "api_success_message": "",
+  "api_failure_message": "",
+  "gridDataListenChannel": "GridDataLoaded"
+}

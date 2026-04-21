@@ -1,0 +1,95 @@
+// ============================================================
+// CHANGES TO: widgets/custom-grid-list/src/runtime/widget.tsx
+// Request 1 — GridDataLoaded event dispatched from loadData
+//
+// One targeted change only. Apply to the existing file.
+// ============================================================
+
+
+// ── CHANGE: dispatch GridDataLoaded at the end of loadData ───────────────────
+//
+// FIND the success path of loadData. It currently ends like this:
+//
+//         setOriginalData(data)
+//         setCurrentItems(data.slice(indexOfFirst, indexOfLast))
+//         setTotalPage(Math.ceil(data.length / itemsPerPage))
+//         setCurrentPage(page)
+//         setIsLoading(false)
+//     }, [
+//         props.config.webApiUrl,
+//         props.config.urlParams,
+//         props.config.use_username_for_datafilter,
+//         props.config.itemsPerPage
+//     ])
+//
+// REPLACE WITH (add the dispatch block between setIsLoading and the dep array):
+//
+//         setOriginalData(data)
+//         setCurrentItems(data.slice(indexOfFirst, indexOfLast))
+//         setTotalPage(Math.ceil(data.length / itemsPerPage))
+//         setCurrentPage(page)
+//         setIsLoading(false)
+//
+//         // NEW CHANGE: GridDataLoaded event — Request 1.
+//         // Dispatched once after every successful data fetch, carrying a payload
+//         // built from the configured payloadFields mapped against a synthetic
+//         // source object { count: data.length }.
+//         // If no payloadFields are configured the payload defaults to { count: n }
+//         // so receiving widgets always have access to the row count without any
+//         // additional settings configuration on the grid side.
+//         if (
+//             props.config.gridDataLoadedChannel &&
+//             Array.isArray(props.config.gridDataLoadedTargetWidgetIds) &&
+//             props.config.gridDataLoadedTargetWidgetIds.length > 0
+//         ) {
+//             // The source object exposes computed values from the loaded dataset.
+//             // Only 'count' is available now; extend this object if further
+//             // computed fields are needed in future (e.g. pageCount, firstId).
+//             const sourceObj: Record<string, any> = { count: data.length }
+//
+//             const payload: Record<string, any> = {}
+//             const fieldStr = props.config.gridDataLoadedPayloadFields || ''
+//
+//             if (fieldStr) {
+//                 // Build payload from configured fieldName:payloadKey pairs,
+//                 // same parsing logic used throughout the widget for all
+//                 // other payload field mappings.
+//                 fieldStr.split(',').forEach(pair => {
+//                     const colonIdx = pair.indexOf(':')
+//                     if (colonIdx === -1) return
+//                     const fieldName = pair.slice(0, colonIdx).trim()
+//                     const payloadKey = pair.slice(colonIdx + 1).trim()
+//                     if (sourceObj[fieldName] !== undefined) {
+//                         payload[payloadKey] = sourceObj[fieldName]
+//                     }
+//                 })
+//             }
+//
+//             // Default fallback: if no fieldStr was configured or none of the
+//             // configured fields matched, emit { count: n } automatically so
+//             // the receiving widget always gets something useful.
+//             if (Object.keys(payload).length === 0) {
+//                 payload['count'] = data.length
+//             }
+//
+//             console.log(
+//                 `custom-grid-list - dispatching '${props.config.gridDataLoadedChannel}':`,
+//                 JSON.stringify(payload)
+//             )
+//
+//             Array.from(props.config.gridDataLoadedTargetWidgetIds).forEach((widgetId: string) => {
+//                 props.dispatch(
+//                     appActions.widgetStatePropChange(
+//                         widgetId,
+//                         props.config.gridDataLoadedChannel,
+//                         payload
+//                     )
+//                 )
+//             })
+//         }
+//     }, [
+//         props.config.webApiUrl,
+//         props.config.urlParams,
+//         props.config.use_username_for_datafilter,
+//         props.config.itemsPerPage
+//     ])

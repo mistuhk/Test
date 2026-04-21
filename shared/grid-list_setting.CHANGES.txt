@@ -1,0 +1,136 @@
+// ============================================================
+// CHANGES TO: widgets/custom-grid-list/src/setting/setting.tsx
+// Request 1 — GridDataLoaded notification settings section
+//
+// Three targeted changes. Apply in order.
+// ============================================================
+
+
+// ── CHANGE 1: add gridDataLoadedTargetWidgetIdValue to State interface ────────
+//
+// FIND:
+//     interface State {
+//         inputKey: number
+//         targetWidgetIdValue: string
+//         postActionTargetWidgetIdValue: string
+//         ...
+//     }
+//
+// REPLACE WITH (add one new field):
+//
+//     interface State {
+//         inputKey: number
+//         targetWidgetIdValue: string
+//         postActionTargetWidgetIdValue: string
+//         gridDataLoadedTargetWidgetIdValue: string  // NEW CHANGE: Request 1
+//         ...
+//     }
+
+
+// ── CHANGE 2: initialise the new state field in the constructor ───────────────
+//
+// FIND:
+//         this.state = {
+//             inputKey: 0,
+//             targetWidgetIdValue: '',
+//             postActionTargetWidgetIdValue: '',
+//             ...
+//         }
+//
+// REPLACE WITH (add one new entry):
+//
+//         this.state = {
+//             inputKey: 0,
+//             targetWidgetIdValue: '',
+//             postActionTargetWidgetIdValue: '',
+//             gridDataLoadedTargetWidgetIdValue: '',  // NEW CHANGE: Request 1
+//             ...
+//         }
+
+
+// ── CHANGE 3: add two new helper methods and the new settings section ─────────
+//
+// ADD these two helper methods anywhere after onClearPostActionTargetWidgetIds
+// (or alongside the other target widget ID helpers):
+//
+//     // NEW CHANGE: GridDataLoaded target widget ID helpers — Request 1.
+//     onAddGridDataLoadedTargetWidgetId = () => {
+//         const newId = this.state.gridDataLoadedTargetWidgetIdValue.trim()
+//         if (!newId) return
+//         const existing = Array.from(this.props.config.gridDataLoadedTargetWidgetIds || [])
+//         if (!existing.includes(newId)) {
+//             this.props.onSettingChange({
+//                 id: this.props.id,
+//                 config: this.props.config.set('gridDataLoadedTargetWidgetIds', [...existing, newId])
+//             })
+//         }
+//         this.setState({ gridDataLoadedTargetWidgetIdValue: '', inputKey: Date.now() })
+//     }
+//
+//     onClearGridDataLoadedTargetWidgetIds = () => {
+//         this.props.onSettingChange({
+//             id: this.props.id,
+//             config: this.props.config.set('gridDataLoadedTargetWidgetIds', [])
+//         })
+//         this.setState({ gridDataLoadedTargetWidgetIdValue: '', inputKey: Date.now() })
+//     }
+//
+//
+// Then, in render(), ADD the following new SettingSection immediately after the
+// existing sectionRowDispatch section and before the sectionListen section:
+//
+//     {/* NEW CHANGE: On data loaded dispatch notification — Request 1.
+//         Fires once inside loadData after every successful API response.
+//         The available source field is { count } where count = total rows returned.
+//         payloadFields uses the same KeyValueEditor (fieldName:payloadKey) format
+//         as row click dispatch. If left empty, the payload defaults to { count: n }. */}
+//     <SettingSection title='On data loaded: dispatch notification'>
+//
+//         <SettingRow>
+//             <div style={hintStyle}>
+//                 When configured, dispatches a notification to the listed target widgets
+//                 each time the grid loads data from the API. The source value available
+//                 for mapping is <strong>count</strong> — the total number of rows returned.
+//                 Example payload field mapping: <em>count → count</em> produces
+//                 {'{ "count": 10 }'}. Leave payload fields empty to emit {'{ "count": n }'}
+//                 automatically with no configuration.
+//             </div>
+//         </SettingRow>
+//
+//         <SettingRow label='Channel name' />
+//         <SettingRow>
+//             <TextInput
+//                 size='sm'
+//                 value={c.gridDataLoadedChannel || ''}
+//                 placeholder='e.g. GridDataLoaded'
+//                 onChange={this.onTextChange('gridDataLoadedChannel')}
+//                 onBlur={this.onTextChange('gridDataLoadedChannel')}
+//                 onKeyUp={this.onTextChange('gridDataLoadedChannel')}
+//             />
+//         </SettingRow>
+//
+//         <SettingRow label='Payload fields (optional)' />
+//         <SettingRow>
+//             <div style={hintStyle}>
+//                 Map source fields to payload keys. Only <strong>count</strong> is
+//                 available as a source field. Leave empty for the default
+//                 {'{ "count": n }'} payload.
+//             </div>
+//             <KeyValueEditor
+//                 value={c.gridDataLoadedPayloadFields || ''}
+//                 onChange={this.onKvChange('gridDataLoadedPayloadFields')}
+//                 keyPlaceholder='fieldName (e.g. count)'
+//                 valuePlaceholder='payloadKey (e.g. count)'
+//             />
+//         </SettingRow>
+//
+//         {this.renderWidgetIdInput(
+//             'Target widget IDs',
+//             Array.from(c.gridDataLoadedTargetWidgetIds || []).join(', '),
+//             this.state.gridDataLoadedTargetWidgetIdValue,
+//             val => this.setState({ gridDataLoadedTargetWidgetIdValue: val }),
+//             this.onAddGridDataLoadedTargetWidgetId,
+//             this.onClearGridDataLoadedTargetWidgetIds
+//         )}
+//
+//     </SettingSection>
