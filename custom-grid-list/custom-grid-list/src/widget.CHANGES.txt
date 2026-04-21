@@ -1,0 +1,387 @@
+// ============================================================
+// CHANGES TO: widgets/custom-grid-list/src/runtime/widget.tsx
+// Improvement #4 — Column sorting
+// Improvement #5 — Select all checkbox
+//
+// Apply the numbered changes below in order. Every section
+// shows the exact code to FIND and the exact code to REPLACE
+// it with. Unchanged surrounding lines are shown for context
+// (prefixed with "// ...").
+// ============================================================
+
+
+// ── CHANGE 1: extend the style import ────────────────────────────────────────
+//
+// FIND:
+//     import {
+//         ...
+//         noDataStyle
+//     } from './style'
+//
+// REPLACE WITH  (add loadingCellStyle and sortIndicatorStyle):
+//
+//     import {
+//         ...
+//         noDataStyle,
+//         loadingCellStyle,       // improvement #1 (already added)
+//         sortIndicatorStyle      // NEW CHANGE: improvement #4
+//     } from './style'
+
+
+// ── CHANGE 2: new state variables ────────────────────────────────────────────
+//
+// FIND (the last existing useState declaration before tbodyRef):
+//     const [activeRow, setActiveRow] = useState<any>(null)
+//
+// REPLACE WITH:
+//
+//     const [activeRow, setActiveRow] = useState<any>(null)
+//
+//     // NEW CHANGE: sort state — improvement #4.
+//     // sortField: the field name currently being sorted on, or null for no sort.
+//     // sortDir:   'asc' | 'desc' | null — cycles on successive header clicks.
+//     const [sortField, setSortField] = useState<string | null>(null)
+//     const [sortDir, setSortDir] = useState<'asc' | 'desc' | null>(null)
+//
+//     // NEW CHANGE: select-all header checkbox state — improvement #5.
+//     // Tracks whether the header checkbox is currently checked.
+//     // Kept in React state (rather than DOM) because it is a single element
+//     // and needs to react to both direct user interaction and programmatic
+//     // uncheckAll calls.
+//     const [headerChecked, setHeaderChecked] = useState<boolean>(false)
+
+
+// ── CHANGE 3: new getSortedData helper ───────────────────────────────────────
+//
+// FIND the getCellValue helper:
+//     const getCellValue = (item: any, field: string): string =>
+//         item[field] !== undefined ? String(item[field]) : ''
+//
+// REPLACE WITH (add getSortedData immediately after getCellValue):
+//
+//     const getCellValue = (item: any, field: string): string =>
+//         item[field] !== undefined ? String(item[field]) : ''
+//
+//     // NEW CHANGE: pure sort helper — improvement #4.
+//     // Returns a new sorted array without mutating the source.
+//     // Sorting is case-insensitive string comparison; numeric strings sort
+//     // numerically when both values parse as finite numbers.
+//     // When sortField or sortDir is null the original order is preserved.
+//     const getSortedData = (data: any[]): any[] => {
+//         if (!sortField || !sortDir) return data
+//
+//         return [...data].sort((a, b) => {
+//             const rawA = a[sortField] !== undefined ? String(a[sortField]) : ''
+//             const rawB = b[sortField] !== undefined ? String(b[sortField]) : ''
+//
+//             const numA = parseFloat(rawA)
+//             const numB = parseFloat(rawB)
+//             const bothNumeric = isFinite(numA) && isFinite(numB)
+//
+//             let cmp: number
+//             if (bothNumeric) {
+//                 cmp = numA - numB
+//             } else {
+//                 cmp = rawA.toLowerCase().localeCompare(rawB.toLowerCase())
+//             }
+//
+//             return sortDir === 'asc' ? cmp : -cmp
+//         })
+//     }
+
+
+// ── CHANGE 4: extend uncheckAll to reset header checkbox ─────────────────────
+//
+// FIND:
+//     const uncheckAll = () => {
+//         if (!tbodyRef.current) return
+//
+//         tbodyRef.current.querySelectorAll('input[type="checkbox"]').forEach((cb: Element) => {
+//             (cb as HTMLInputElement).checked = false
+//         })
+//
+//         setCheckedCount(0)
+//     }
+//
+// REPLACE WITH:
+//
+//     const uncheckAll = () => {
+//         if (!tbodyRef.current) return
+//
+//         tbodyRef.current.querySelectorAll('input[type="checkbox"]').forEach((cb: Element) => {
+//             (cb as HTMLInputElement).checked = false
+//         })
+//
+//         setCheckedCount(0)
+//         setHeaderChecked(false)  // NEW CHANGE: reset header checkbox — improvement #5
+//     }
+
+
+// ── CHANGE 5: extend onCheckboxChange to sync header checkbox ─────────────────
+//
+// FIND:
+//     const onCheckboxChange = () => {
+//         setTimeout(() => setCheckedCount(getCheckedCount()), 0)
+//     }
+//
+// REPLACE WITH:
+//
+//     const onCheckboxChange = () => {
+//         setTimeout(() => {
+//             const count = getCheckedCount()
+//             setCheckedCount(count)
+//
+//             // NEW CHANGE: keep header checkbox in sync — improvement #5.
+//             // If every row checkbox on the current page is now checked, tick
+//             // the header. Otherwise untick it. Uses tbodyRef to count all
+//             // row checkboxes (not the header checkbox) on the current page.
+//             if (tbodyRef.current) {
+//                 const all = tbodyRef.current.querySelectorAll('input[type="checkbox"]').length
+//                 setHeaderChecked(all > 0 && count === all)
+//             }
+//         }, 0)
+//     }
+
+
+// ── CHANGE 6: new onHeaderCheckboxChange handler ──────────────────────────────
+//
+// FIND the onCheckboxChange function (just replaced above) and add the new
+// handler immediately after it:
+//
+//     // NEW CHANGE: header checkbox handler — improvement #5.
+//     // When the header checkbox is ticked, check every row checkbox on the
+//     // current page by writing directly to the DOM (consistent with how
+//     // getCheckedRows and uncheckAll work). When unticked, call uncheckAll.
+//     const onHeaderCheckboxChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+//         const checked = evt.target.checked
+//         setHeaderChecked(checked)
+//
+//         if (!tbodyRef.current) return
+//
+//         if (checked) {
+//             tbodyRef.current.querySelectorAll('input[type="checkbox"]').forEach((cb: Element) => {
+//                 (cb as HTMLInputElement).checked = true
+//             })
+//             setCheckedCount(getCheckedCount())
+//         } else {
+//             uncheckAll()
+//         }
+//     }
+
+
+// ── CHANGE 7: new handleSortClick handler ────────────────────────────────────
+//
+// Add this immediately after onHeaderCheckboxChange (or after onCheckboxChange
+// if you are adding in that area). Place it before the token validation useEffect.
+//
+//     // NEW CHANGE: column sort handler — improvement #4.
+//     // Clicking a column header cycles: no sort → asc → desc → no sort.
+//     // Changing the sort field resets direction to asc.
+//     // Sorting resets to page 1 and unchecks all rows (consistent with search
+//     // and pagination behaviour).
+//     const handleSortClick = (field: string) => {
+//         let newField = field
+//         let newDir: 'asc' | 'desc' | null
+//
+//         if (sortField !== field) {
+//             // New column — start ascending
+//             newDir = 'asc'
+//         } else if (sortDir === 'asc') {
+//             newDir = 'desc'
+//         } else if (sortDir === 'desc') {
+//             // Third click clears the sort
+//             newField = null
+//             newDir = null
+//         } else {
+//             newDir = 'asc'
+//         }
+//
+//         setSortField(newField)
+//         setSortDir(newDir)
+//
+//         // Re-paginate from page 1 using the new sort.
+//         // We read the incoming newField/newDir directly rather than relying
+//         // on the updated state (which won't be visible yet in this closure).
+//         const itemsPerPage = parseInt(props.config.itemsPerPage) || 10
+//         const sorted = newField && newDir
+//             ? [...originalData].sort((a, b) => {
+//                 const rawA = a[newField] !== undefined ? String(a[newField]) : ''
+//                 const rawB = b[newField] !== undefined ? String(b[newField]) : ''
+//                 const numA = parseFloat(rawA)
+//                 const numB = parseFloat(rawB)
+//                 const bothNumeric = isFinite(numA) && isFinite(numB)
+//                 const cmp = bothNumeric ? numA - numB : rawA.toLowerCase().localeCompare(rawB.toLowerCase())
+//                 return newDir === 'asc' ? cmp : -cmp
+//             })
+//             : originalData
+//
+//         setCurrentItems(sorted.slice(0, itemsPerPage))
+//         setTotalPage(Math.ceil(sorted.length / itemsPerPage))
+//         setCurrentPage(1)
+//         uncheckAll()
+//         setSelectedRowKey(null)
+//     }
+
+
+// ── CHANGE 8: extend handlePagination to respect sort order ──────────────────
+//
+// FIND:
+//     const handlePagination = (page: number) => {
+//         const itemsPerPage = parseInt(props.config.itemsPerPage) || 10
+//         const indexOfLast = page * itemsPerPage
+//         const indexOfFirst = indexOfLast - itemsPerPage
+//
+//         setCurrentPage(page)
+//         setCurrentItems(originalData.slice(indexOfFirst, indexOfLast))
+//         uncheckAll()
+//         setSelectedRowKey(null)
+//     }
+//
+// REPLACE WITH:
+//
+//     const handlePagination = (page: number) => {
+//         const itemsPerPage = parseInt(props.config.itemsPerPage) || 10
+//         const indexOfLast = page * itemsPerPage
+//         const indexOfFirst = indexOfLast - itemsPerPage
+//
+//         setCurrentPage(page)
+//         // NEW CHANGE: paginate over sorted data — improvement #4.
+//         setCurrentItems(getSortedData(originalData).slice(indexOfFirst, indexOfLast))
+//         uncheckAll()
+//         setSelectedRowKey(null)
+//     }
+
+
+// ── CHANGE 9: extend searchItem to apply sort after filtering ─────────────────
+//
+// FIND:
+//     const searchItem = () => {
+//         const columns = getColumns()
+//         const lower = searchText.toLowerCase()
+//
+//         const filtered = originalData.filter(item =>
+//             columns.some(col => getCellValue(item, col.field).toLowerCase().includes(lower))
+//         )
+//         const itemsPerPage = parseInt(props.config.itemsPerPage) || 10
+//
+//         setCurrentItems(filtered.slice(0, itemsPerPage))
+//         setTotalPage(Math.ceil(filtered.length / itemsPerPage))
+//         setCurrentPage(1)
+//         uncheckAll()
+//         setSelectedRowKey(null)
+//     }
+//
+// REPLACE WITH:
+//
+//     const searchItem = () => {
+//         const columns = getColumns()
+//         const lower = searchText.toLowerCase()
+//
+//         const filtered = originalData.filter(item =>
+//             columns.some(col => getCellValue(item, col.field).toLowerCase().includes(lower))
+//         )
+//         // NEW CHANGE: sort the filtered results before paginating — improvement #4.
+//         const sorted = getSortedData(filtered)
+//         const itemsPerPage = parseInt(props.config.itemsPerPage) || 10
+//
+//         setCurrentItems(sorted.slice(0, itemsPerPage))
+//         setTotalPage(Math.ceil(sorted.length / itemsPerPage))
+//         setCurrentPage(1)
+//         uncheckAll()
+//         setSelectedRowKey(null)
+//     }
+
+
+// ── CHANGE 10: extend clearSearch to apply sort ───────────────────────────────
+//
+// FIND:
+//     const clearSearch = () => {
+//         setSearchText('')
+//
+//         const itemsPerPage = parseInt(props.config.itemsPerPage) || 10
+//
+//         setCurrentItems(originalData.slice(0, itemsPerPage))
+//         setTotalPage(Math.ceil(originalData.length / itemsPerPage))
+//         setCurrentPage(1)
+//         uncheckAll()
+//         setSelectedRowKey(null)
+//     }
+//
+// REPLACE WITH:
+//
+//     const clearSearch = () => {
+//         setSearchText('')
+//
+//         // NEW CHANGE: restore sort order when clearing search — improvement #4.
+//         const sorted = getSortedData(originalData)
+//         const itemsPerPage = parseInt(props.config.itemsPerPage) || 10
+//
+//         setCurrentItems(sorted.slice(0, itemsPerPage))
+//         setTotalPage(Math.ceil(sorted.length / itemsPerPage))
+//         setCurrentPage(1)
+//         uncheckAll()
+//         setSelectedRowKey(null)
+//     }
+
+
+// ── CHANGE 11: replace the thead render block ─────────────────────────────────
+//
+// FIND:
+//     <thead>
+//         <tr>
+//             {showCheckboxes && originalData.length > 1 && (
+//                 <th style={{ ...thStyle, width: '30px', maxWidth: '30px' }}></th>
+//             )}
+//             {columns.map((col, i) => (
+//                 <th key={i} style={thStyle}>{col.label}</th>
+//             ))}
+//             {showRowAction && (
+//                 <th style={{ ...thStyle, width: '90px', maxWidth: '90px' }}>Action</th>
+//             )}
+//         </tr>
+//     </thead>
+//
+// REPLACE WITH:
+//
+//     <thead>
+//         <tr>
+//             {showCheckboxes && originalData.length > 1 && (
+//                 // NEW CHANGE: header checkbox cell — improvement #5.
+//                 // The checkbox checks/unchecks all visible rows on the current page.
+//                 // Controlled via headerChecked state so it stays in sync with
+//                 // uncheckAll() calls and individual row changes.
+//                 <th style={{ ...thStyle, width: '30px', maxWidth: '30px', textAlign: 'center' }}>
+//                     <input
+//                         type='checkbox'
+//                         checked={headerChecked}
+//                         onChange={onHeaderCheckboxChange}
+//                         style={{ cursor: 'pointer', accentColor: '#fff' }}
+//                         title='Select all on this page'
+//                     />
+//                 </th>
+//             )}
+//             {columns.map((col, i) => (
+//                 // NEW CHANGE: clickable column headers for sorting — improvement #4.
+//                 // Each th is clickable and cycles sort: none → asc → desc → none.
+//                 // The active sort column shows a ▲ or ▼ indicator.
+//                 // cursor: 'pointer' is applied inline to avoid creating a new
+//                 // exported style just for this single property override.
+//                 <th
+//                     key={i}
+//                     style={{ ...thStyle, cursor: 'pointer', userSelect: 'none' }}
+//                     onClick={() => handleSortClick(col.field)}
+//                     title={`Sort by ${col.label}`}
+//                 >
+//                     {col.label}
+//                     {sortField === col.field && (
+//                         <span style={sortIndicatorStyle}>
+//                             {sortDir === 'asc' ? '▲' : '▼'}
+//                         </span>
+//                     )}
+//                 </th>
+//             ))}
+//             {showRowAction && (
+//                 <th style={{ ...thStyle, width: '90px', maxWidth: '90px' }}>Action</th>
+//             )}
+//         </tr>
+//     </thead>
