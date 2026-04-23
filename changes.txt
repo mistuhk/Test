@@ -1,0 +1,237 @@
+// ============================================================
+// CHANGES TO: widgets/custom-grid-list/src/setting/setting.tsx
+// Request 1 — GridDataLoaded notification settings section
+//             with the same blue card UI as row click dispatch
+//
+// Four targeted changes. Apply in order.
+// ============================================================
+
+
+// ── CHANGE 1: extend the State interface ─────────────────────────────────────
+//
+// FIND:
+//     interface State {
+//         ...
+//         showAddDispatchEvent: boolean
+//     }
+//
+// REPLACE WITH:
+//
+//     interface State {
+//         ...
+//         showAddDispatchEvent: boolean
+//         // NEW CHANGE: controls visibility of the GridDataLoaded inline form — Request 1
+//         showGridDataLoadedForm: boolean
+//         // Temporary form values held in state while the user fills in the form.
+//         // Kept in state (not local vars) so the form is fully controlled and
+//         // KeyValueEditor changes are captured correctly between renders.
+//         gdlTempChannel: string
+//         gdlTempPayload: string
+//         gdlTempTargets: string
+//     }
+
+
+// ── CHANGE 2: extend the constructor ─────────────────────────────────────────
+//
+// FIND:
+//         this.state = {
+//             ...
+//             showAddDispatchEvent: false
+//         }
+//
+// REPLACE WITH:
+//
+//         this.state = {
+//             ...
+//             showAddDispatchEvent: false,
+//             showGridDataLoadedForm: false,  // NEW CHANGE: Request 1
+//             gdlTempChannel: '',
+//             gdlTempPayload: '',
+//             gdlTempTargets: ''
+//         }
+
+
+// ── CHANGE 3: add helper and renderer methods ─────────────────────────────────
+//
+// ADD these five methods alongside the other helpers
+// (e.g. immediately after onClearPostActionTargetWidgetIds):
+//
+//
+//     // NEW CHANGE: save the GridDataLoaded event to config — Request 1.
+//     // Writes all three flat config fields in a single onSettingChange call
+//     // and closes the form.
+//     onSaveGridDataLoadedEvent = () => {
+//         const { gdlTempChannel, gdlTempPayload, gdlTempTargets } = this.state
+//         if (!gdlTempChannel.trim()) return
+//
+//         const targetIds = gdlTempTargets.split(',').map(s => s.trim()).filter(Boolean)
+//
+//         this.props.onSettingChange({
+//             id: this.props.id,
+//             config: this.props.config
+//                 .set('gridDataLoadedChannel', gdlTempChannel.trim())
+//                 .set('gridDataLoadedPayloadFields', gdlTempPayload.trim())
+//                 .set('gridDataLoadedTargetWidgetIds', targetIds)
+//         })
+//
+//         this.setState({ showGridDataLoadedForm: false, gdlTempChannel: '', gdlTempPayload: '', gdlTempTargets: '' })
+//     }
+//
+//
+//     // NEW CHANGE: clear the configured GridDataLoaded event — Request 1.
+//     onClearGridDataLoadedEvent = () => {
+//         this.props.onSettingChange({
+//             id: this.props.id,
+//             config: this.props.config
+//                 .set('gridDataLoadedChannel', '')
+//                 .set('gridDataLoadedPayloadFields', '')
+//                 .set('gridDataLoadedTargetWidgetIds', [])
+//         })
+//     }
+//
+//
+//     // NEW CHANGE: renders the configured GridDataLoaded event as a blue card — Request 1.
+//     // Uses listenerCardStyle, listenerCardHeaderStyle, listenerChannelLabelStyle and
+//     // removeBtnStyle — the same constants used by renderDispatchEventCard — so the
+//     // two sections are visually identical.
+//     renderGridDataLoadedCard = () => {
+//         const c = this.props.config
+//         const payloadFields = c.gridDataLoadedPayloadFields || ''
+//         const targets = Array.from(c.gridDataLoadedTargetWidgetIds || [])
+//
+//         return (
+//             <div style={listenerCardStyle}>
+//                 <div style={listenerCardHeaderStyle}>
+//                     <span style={listenerChannelLabelStyle}>{c.gridDataLoadedChannel}</span>
+//                     <button style={removeBtnStyle} onClick={this.onClearGridDataLoadedEvent}>
+//                         Remove
+//                     </button>
+//                 </div>
+//                 <div style={{ fontSize: '11px', color: '#666', fontFamily: 'Arial' }}>
+//                     {payloadFields
+//                         ? <span>Payload: <em>{payloadFields}</em></span>
+//                         : <span style={{ fontStyle: 'italic' }}>Default payload: {'{ "count": n }'}</span>
+//                     }
+//                 </div>
+//                 {targets.length > 0 && (
+//                     <div style={{ fontSize: '11px', color: '#666', fontFamily: 'Arial', marginTop: '3px' }}>
+//                         Targets: [{targets.join(', ')}]
+//                     </div>
+//                 )}
+//             </div>
+//         )
+//     }
+//
+//
+//     // NEW CHANGE: renders the inline add/configure form — Request 1.
+//     // Uses the same dashed blue border style as renderAddDispatchEventForm.
+//     // KeyValueEditor is used for payload fields, consistent with all other
+//     // payload field inputs in the settings panel.
+//     renderGridDataLoadedForm = () => (
+//         <div style={{ border: '1px dashed #076FE5', padding: '8px 10px', marginBottom: '8px' }}>
+//             <SettingRow label='Channel name' />
+//             <SettingRow>
+//                 <input
+//                     type='text'
+//                     value={this.state.gdlTempChannel}
+//                     placeholder='e.g. GridDataLoaded'
+//                     style={{
+//                         width: '100%', padding: '4px 6px', fontSize: '12px',
+//                         border: '1px solid #ccc', borderRadius: 0, fontFamily: 'Arial'
+//                     }}
+//                     onChange={e => this.setState({ gdlTempChannel: e.target.value })}
+//                 />
+//             </SettingRow>
+//
+//             <SettingRow label='Payload fields (optional)' />
+//             <SettingRow>
+//                 <div style={hintStyle}>
+//                     Map source fields to payload keys. The only available source field is
+//                     <strong> count</strong>. Leave empty to emit {'{ "count": n }'} automatically.
+//                 </div>
+//                 <KeyValueEditor
+//                     value={this.state.gdlTempPayload}
+//                     onChange={val => this.setState({ gdlTempPayload: val })}
+//                     keyPlaceholder='fieldName (e.g. count)'
+//                     valuePlaceholder='payloadKey (e.g. count)'
+//                 />
+//             </SettingRow>
+//
+//             <SettingRow label='Target widget IDs (comma-separated)' />
+//             <SettingRow>
+//                 <input
+//                     type='text'
+//                     value={this.state.gdlTempTargets}
+//                     placeholder='e.g. widget_75, widget_76'
+//                     style={{
+//                         width: '100%', padding: '4px 6px', fontSize: '12px',
+//                         border: '1px solid #ccc', borderRadius: 0, fontFamily: 'Arial'
+//                     }}
+//                     onChange={e => this.setState({ gdlTempTargets: e.target.value })}
+//                 />
+//             </SettingRow>
+//
+//             <SettingRow>
+//                 <Button size='default' type='primary' onClick={this.onSaveGridDataLoadedEvent}>
+//                     Save event
+//                 </Button>
+//                 &nbsp;
+//                 <Button size='default' type='default'
+//                     onClick={() => this.setState({ showGridDataLoadedForm: false, gdlTempChannel: '', gdlTempPayload: '', gdlTempTargets: '' })}>
+//                     Cancel
+//                 </Button>
+//             </SettingRow>
+//         </div>
+//     )
+
+
+// ── CHANGE 4: add the new SettingSection in render() ─────────────────────────
+//
+// In render(), ADD the following SettingSection immediately after the closing
+// </SettingSection> of sectionRowDispatch and BEFORE the opening <SettingSection>
+// of sectionListen:
+//
+//     {/* NEW CHANGE: On data loaded dispatch notification — Request 1.
+//         Same blue card UI as row click dispatch (sectionRowDispatch above).
+//         Backed by three flat config fields rather than an array because only
+//         one GridDataLoaded event makes sense per widget instance.
+//         A card is shown when configured; Remove clears it; Configure re-opens
+//         the inline form. The only source field is 'count' (total rows from API). */}
+//     <SettingSection title='On data loaded: dispatch notification'>
+//
+//         <SettingRow>
+//             <div style={hintStyle}>
+//                 Dispatches a notification each time the grid loads data from the API.
+//                 The only source field available for payload mapping is{' '}
+//                 <strong>count</strong> — the total number of rows returned.
+//                 Leave payload fields empty to emit {'{ "count": n }'} automatically.
+//             </div>
+//         </SettingRow>
+//
+//         {/* Empty state */}
+//         {!c.gridDataLoadedChannel && !this.state.showGridDataLoadedForm && (
+//             <SettingRow>
+//                 <div style={{ fontSize: '12px', color: '#888', fontStyle: 'italic' }}>
+//                     Not configured. Click + Configure to add the event.
+//                 </div>
+//             </SettingRow>
+//         )}
+//
+//         {/* Configured card */}
+//         {c.gridDataLoadedChannel && this.renderGridDataLoadedCard()}
+//
+//         {/* Show form or Configure button — hidden once an event is saved */}
+//         {!c.gridDataLoadedChannel && (
+//             this.state.showGridDataLoadedForm
+//                 ? this.renderGridDataLoadedForm()
+//                 : (
+//                     <button
+//                         style={addBtnStyle}
+//                         onClick={() => this.setState({ showGridDataLoadedForm: true })}
+//                     >
+//                         + Configure
+//                     </button>
+//                 )
+//         )}
+//
+//     </SettingSection>
